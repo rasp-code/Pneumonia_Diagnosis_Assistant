@@ -1,0 +1,49 @@
+services:
+  webapp:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MODE=edge
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=llama3.2:1b
+      - ACV_LOCAL_URL=http://customvision:80/image
+      - AML_MODEL_PATH=/app/aml_model/pneumonia_model.keras
+    volumes:
+      - ./aml_model:/app/aml_model
+    depends_on:
+      - ollama
+      - customvision
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  ollama-init:
+    image: ollama/ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    entrypoint: >
+      sh -c "
+        echo 'Attente du démarrage Ollama...' &&
+        sleep 5 &&
+        echo 'Téléchargement du modèle llama3...' &&
+        ollama pull llama3.2:1b &&
+        echo 'Modèle prêt !'
+      "
+    depends_on:
+      - ollama
+
+  customvision:
+    image: azureacrprojetepta.azurecr.io/azure-cv-projet-epita:v1
+    ports:
+      - "8081:80"
+
+volumes:
+  ollama_data:

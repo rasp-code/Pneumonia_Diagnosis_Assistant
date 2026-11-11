@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détection de pneumonie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Analyse de radio pulmonaire</h1>
+        <p class="mode-badge">Mode actuel : <strong>{{ mode if mode else "edge/cloud" }}</strong></p>
+
+        <form action="/analyse" method="post" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">Analyser</button>
+        </form>
+
+        {% if error %}
+        <div class="error">
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+
+        {% if rapport %}
+        <div class="resultats">
+            <h2>Résultats</h2>
+            <ul>
+                <li>Image reconnue comme radio thoracique : {{ acv_confidence }}% de confiance</li>
+                <li>Diagnostic : <strong>{{ aml_label }}</strong> ({{ aml_confidence }}% de confiance)</li>
+            </ul>
+
+            <h2>Rapport généré</h2>
+            <div class="rapport">
+                {{ rapport }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
